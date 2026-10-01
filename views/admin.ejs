@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Senior Privs Records</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div
+      id="checkin-records"
+      class="card w-full max-w-4xl p-8 rounded-2xl shadow-2xl text-center transition-all duration-500"
+    >
+      <% if (data.length > 0 || searchTerm) { %>
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        Senior Privs Records
+      </h1>
+      <form action="/admin" method="GET" class="mb-4">
+        <div class="flex items-center space-x-2">
+          <input
+            name="search"
+            class="w-full p-2 border border-gray-300 rounded-md"
+            type="text"
+            placeholder="Search by name or ID..."
+            value="<%= searchTerm %>"
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Search
+          </button>
+        </div>
+      </form>
+
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>
+              <a
+                href="/admin?search=<%= searchTerm %>&sort=studentID&order=<%= (sortBy === 'studentID' && sortOrder === 'ASC') ? 'DESC' : 'ASC' %>"
+              >
+                Student ID <% if (sortBy === 'studentID') { %>
+                <span><%= sortOrder === 'ASC' ? '▲' : '▼' %></span>
+                <% } %>
+              </a>
+            </th>
+            <th>
+              <a
+                href="/admin?search=<%= searchTerm %>&sort=studentName&order=<%= (sortBy === 'studentName' && sortOrder === 'ASC') ? 'DESC' : 'ASC' %>"
+              >
+                Student Name <% if (sortBy === 'studentName') { %>
+                <span><%= sortOrder === 'ASC' ? '▲' : '▼' %></span>
+                <% } %>
+              </a>
+            </th>
+            <th>
+              <a
+                href="/admin?search=<%= searchTerm %>&sort=status&order=<%= (sortBy === 'status' && sortOrder === 'ASC') ? 'DESC' : 'ASC' %>"
+              >
+                Last Activity <% if (sortBy === 'status') { %>
+                <span><%= sortOrder === 'ASC' ? '▲' : '▼' %></span>
+                <% } %>
+              </a>
+            </th>
+            <th>
+              <a
+                href="/admin?search=<%= searchTerm %>&sort=timestamp&order=<%= (sortBy === 'timestamp' && sortOrder === 'ASC') ? 'DESC' : 'ASC' %>"
+              >
+                Timestamp <% if (sortBy === 'timestamp') { %>
+                <span><%= sortOrder === 'ASC' ? '▲' : '▼' %></span>
+                <% } %>
+              </a>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="list">
+          <% data.forEach(item => { %>
+          <tr>
+            <td class="student-id"><%= item['Student ID'] %></td>
+            <td class="student-name"><%= item['Student Name'] %></td>
+            <td class="last-activity"><%= item['Last Activity'] %></td>
+            <td class="timestamp">
+              <%= new Date(item.timestamp).toLocaleString() %>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+
+      <% if (totalPages > 1) { %>
+      <div
+        class="flex justify-center items-center flex-wrap space-x-1 sm:space-x-2 mt-8 text-sm sm:text-base"
+      >
+        <% // Create a base query string that preserves search and sort parameters %>
+        <% const baseQuery = `search=${searchTerm}&sort=${sortBy}&order=${sortOrder}`; %>
+
+        <% if (currentPage > 1) { %>
+        <a
+          href="/admin?<%= baseQuery %>&page=<%= currentPage - 1 %>"
+          class="px-3 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+        >
+          &laquo; Previous
+        </a>
+        <% } else { %>
+        <span
+          class="px-3 py-2 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed"
+          >&laquo; Previous</span
+        >
+        <% } %>
+
+        <% const pageWindow = 2; for (let i = 1; i <= totalPages; i++) { if (i
+        === 1 || i === totalPages || (i >= currentPage - pageWindow && i <=
+        currentPage + pageWindow)) { if (i === currentPage) { %>
+        <span class="px-3 py-2 bg-blue-500 text-white rounded-md z-10"
+          ><%= i %></span
+        >
+        <% } else { %>
+        <a
+          href="/admin?<%= baseQuery %>&page=<%= i %>"
+          class="px-3 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+        >
+          <%= i %>
+        </a>
+        <% } } else if (i === currentPage - pageWindow - 1 || i === currentPage
+        + pageWindow + 1) { %>
+        <span class="px-3 py-2 text-gray-500">...</span>
+        <% } } %>
+
+        <% if (currentPage < totalPages) { %>
+        <a
+          href="/admin?<%= baseQuery %>&page=<%= currentPage + 1 %>"
+          class="px-3 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+        >
+          Next &raquo;
+        </a>
+        <% } else { %>
+        <span
+          class="px-3 py-2 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed"
+          >Next &raquo;</span
+        >
+        <% } %>
+      </div>
+      <% } %> <% } else { %>
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        Senior Privs Records
+      </h1>
+      <p class="text-gray-600 mt-4">No records to display.</p>
+      <% } %>
+    </div>
+  </body>
+</html>
